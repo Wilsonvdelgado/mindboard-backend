@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Room } from '../../rooms/entities/room.entity';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -40,6 +41,9 @@ export class User {
     default: UserStatus.PENDING,
   })
   status: UserStatus;
+
+  @OneToMany(() => Room, (rooms) => rooms.user)
+  rooms: Room[];
 
   //   id           Int            @id @default(autoincrement())
   //   email        String         @unique
