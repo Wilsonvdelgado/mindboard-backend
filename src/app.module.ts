@@ -4,9 +4,11 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
-import { RoomsModule } from './rooms/rooms.module';
-import { Room } from './rooms/entities/room.entity';
+import { BoardsModule } from './boards/boards.module';
+import { Board } from './boards/entities/board.entity';
 import { AuthModule } from './auth/auth.module';
+import { CardsModule } from './cards/cards.module';
+import { Card } from './cards/entities/card.entity';
 
 @Module({
   imports: [
@@ -17,12 +19,13 @@ import { AuthModule } from './auth/auth.module';
       username: 'postgres',
       password: '1234',
       database: 'mindboarddb',
-      entities: [User, Room],
+      entities: [User, Board, Card],
       synchronize: true,
     }),
     UsersModule,
-    RoomsModule,
+    BoardsModule,
     AuthModule,
+    CardsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

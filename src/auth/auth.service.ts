@@ -19,6 +19,7 @@ export class AuthService {
     const user = await this.userRepo.findOne({
       where: { email: dto.email, status: UserStatus.ACTIVE },
     });
+
     if (!user) throw new UnauthorizedException('Credenciais inválidas');
 
     const valid = await bcrypt.compare(dto.password, user.password);
@@ -34,7 +35,7 @@ export class AuthService {
       role,
     });
 
-    return { token, user: { name, email } };
+    return { token, user: { name, email, role } };
   }
 
   //   async findById(id: number) {

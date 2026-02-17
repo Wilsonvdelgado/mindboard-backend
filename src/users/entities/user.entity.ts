@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Room } from '../../rooms/entities/room.entity';
+import { Board } from '../../boards/entities/board.entity';
+import { Card } from '../../cards/entities/card.entity';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -42,13 +43,9 @@ export class User {
   })
   status: UserStatus;
 
-  @OneToMany(() => Room, (rooms) => rooms.user)
-  rooms: Room[];
+  @OneToMany(() => Board, (boards) => boards.user)
+  boards: Board[];
 
-  //   id           Int            @id @default(autoincrement())
-  //   email        String         @unique
-  //   name         String?
-  //   password     String
-  //   createdAt    DateTime       @default(now())
-  //   status       UserStatus     @default(PENDING)
+  @OneToMany(() => Card, (cards) => cards.user)
+  cards: Card[];
 }

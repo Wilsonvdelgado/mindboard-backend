@@ -1,19 +1,19 @@
 import { PartialType } from '@nestjs/mapped-types';
 
-export enum RoomStatus {
+export enum BoardStatus {
   ACTIVE = 'active',
   VOTING = 'vonting',
   COMPLETED = 'completed',
   DELETED = 'deleted',
 }
 
-export class CreateRoomDto {
+export class CreateBoardDto {
   name: string;
   description: string;
   userId?: number;
 }
 
-export class UpdateRoomDto extends PartialType(CreateRoomDto) {
+export class UpdateBoardDto extends PartialType(CreateBoardDto) {
   name: string;
   email: string;
 }
