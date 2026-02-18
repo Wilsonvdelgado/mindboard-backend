@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Board } from '../../boards/entities/board.entity';
 import { Card } from '../../cards/entities/card.entity';
+import { Message } from '../../messages/entities/message.entity';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -48,4 +49,9 @@ export class User {
 
   @OneToMany(() => Card, (cards) => cards.user)
   cards: Card[];
+
+  @OneToMany(() => Message, (messages) => messages.user)
+  messages: Message[];
+  // @OneToMany(() => Message, (messages) => messages.user)
+  // messages: Message[];
 }

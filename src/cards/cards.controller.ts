@@ -20,29 +20,29 @@ import type { MbRequest } from '../@types/customRequest';
 export class CardsController {
   constructor(private readonly cardsService: CardsService) {}
 
-  @Post()
-  create(@Body() createCardDto: CardDto, @Req() req: MbRequest) {
-    const userId = +req.user.id;
-    return this.cardsService.create({ ...createCardDto, userId });
-  }
+  // @Post()
+  // create(@Body() createCardDto: CardDto, @Req() req: MbRequest) {
+  //   const userId = +req.user.id;
+  //   return this.cardsService.create({ ...createCardDto, userId });
+  // }
 
-  @Get()
-  findAll(@Query('boardId') boardId: string) {
-    return this.cardsService.findAll(+boardId);
-  }
+  // @Get()
+  // findAll(@Query('boardId') boardId: string) {
+  //   return this.cardsService.findAll(+boardId);
+  // }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.cardsService.findOne(+id);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.cardsService.findOne(+id);
+  // }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCardDto: CardDto) {
-    return this.cardsService.update(+id, updateCardDto);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateCardDto: CardDto) {
+  //   return this.cardsService.update(+id, updateCardDto);
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cardsService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.cardsService.remove(+id);
+  // }
 }

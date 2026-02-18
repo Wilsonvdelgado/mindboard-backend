@@ -38,6 +38,9 @@ export class Card {
 
   @Column()
   status: CardStatus;
+
+  @Column({ nullable: true })
+  color: string;
 }
 
 export enum CardStatus {

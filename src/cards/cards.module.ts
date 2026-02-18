@@ -10,5 +10,6 @@ import { User } from '../users/entities/user.entity';
   imports: [TypeOrmModule.forFeature([Card, Board, User])],
   controllers: [CardsController],
   providers: [CardsService],
+  exports: [CardsService],
 })
 export class CardsModule {}

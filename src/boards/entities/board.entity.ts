@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Card } from '../../cards/entities/card.entity';
+import { Message } from '../../messages/entities/message.entity';
 
 @Entity('boards')
 export class Board {
@@ -34,6 +35,12 @@ export class Board {
 
   @OneToMany(() => Card, (cards) => cards.board)
   cards: Card[];
+
+  @OneToMany(() => Message, (messages) => messages.board)
+  messages: Message[];
+
+  // @OneToMany(() => Message, (message) => message.board)
+  // messages: Message[];
 }
 
 export enum BoardStatus {

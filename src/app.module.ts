@@ -9,6 +9,8 @@ import { Board } from './boards/entities/board.entity';
 import { AuthModule } from './auth/auth.module';
 import { CardsModule } from './cards/cards.module';
 import { Card } from './cards/entities/card.entity';
+import { MessagesModule } from './messages/messages.module';
+import { Message } from './messages/entities/message.entity';
 
 @Module({
   imports: [
@@ -19,13 +21,14 @@ import { Card } from './cards/entities/card.entity';
       username: 'postgres',
       password: '1234',
       database: 'mindboarddb',
-      entities: [User, Board, Card],
+      entities: [User, Board, Card, Message],
       synchronize: true,
     }),
     UsersModule,
     BoardsModule,
     AuthModule,
     CardsModule,
+    MessagesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

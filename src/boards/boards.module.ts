@@ -4,10 +4,21 @@ import { BoardsController } from './boards.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Board } from './entities/board.entity';
 import { User } from '../users/entities/user.entity';
+import { BoardGateway } from './card.gateway';
+import { CardsModule } from '../cards/cards.module';
+import { Message } from '../messages/entities/message.entity';
+import { Card } from '../cards/entities/card.entity';
+import { MessagesModule } from '../messages/messages.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Board, User, Board])],
+  imports: [
+    TypeOrmModule.forFeature([Board, User, Message, Card]),
+    CardsModule,
+    MessagesModule,
+    AuthModule,
+  ],
   controllers: [BoardsController],
-  providers: [BoardsService],
+  providers: [BoardsService, BoardGateway],
 })
 export class BoardsModule {}
