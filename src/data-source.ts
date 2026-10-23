@@ -5,6 +5,9 @@ import { Board } from './boards/entities/board.entity';
 import { Message } from './messages/entities/message.entity';
 import { Card } from './cards/entities/card.entity';
 import { User } from './users/entities/user.entity';
+import { join } from 'path/win32';
+
+
 
 export default new DataSource({
   type: 'postgres',
@@ -14,6 +17,8 @@ export default new DataSource({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
   entities: [User,Board, Card, Message],
-  migrations: ['src/migrations/*.ts'],
+  // migrations: ['src/migrations/*.ts'],
+  migrations: [join(__dirname, 'migrations', '*.js')],
+
   synchronize: false,
 });
