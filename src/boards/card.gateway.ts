@@ -13,6 +13,9 @@ import { MessagesService } from '../messages/messages.service';
 import { CreateMessageDto } from '../messages/dto/create-message.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UserAuth } from '../auth/auth.dto';
+  import { parseCookie } from 'cookie';
+
+
 
 function getError(err: unknown) {
   const error = err instanceof Error ? err : new Error(String(err));
@@ -25,7 +28,11 @@ interface CustomSocket extends Socket {
   };
 }
 
-@WebSocketGateway({ cors: true })
+@WebSocketGateway({ cors: {
+    origin: 'http://localhost:3000',
+    credentials: true,
+    methods: ['GET', 'POST'],
+  } })
 export class BoardGateway {
   @WebSocketServer()
   server: Server;
@@ -36,21 +43,46 @@ export class BoardGateway {
     private jwtService: JwtService,
   ) {}
 
-  handleConnection(client: Socket) {
-    try {
-      console.log('22222');
-      const token = client.handshake.headers.authorization?.replace(
-        'Bearer ',
-        '',
-      );
-      if (!token) throw new Error('No token');
+   afterInit(server: Server) {
+    server.use(async (client: Socket, next) => {
+      try {
+        const cookieHeader = client.handshake.headers.cookie ?? '';
+        const cookies = parseCookie(cookieHeader);
 
-      const user = this.jwtService.verify<UserAuth>(token);
-      client.data.user = user; // salva o user no socket
-    } catch (err) {
-      client.disconnect(); // desconecta se não estiver autenticado
-    }
+
+        // Substitui pelo nome real do teu cookie HttpOnly.
+        const token = cookies['access_token'];
+
+        if (!token) {
+          return next(new Error('Unauthorized'));
+        }
+
+        const user = await this.jwtService.verifyAsync<UserAuth>(token);
+
+        client.data.user = user;
+
+        next();
+      } catch {
+        next(new Error('Unauthorized'));
+      }
+    });
   }
+
+  // handleConnection(client: Socket) {
+  //   try {
+  //     console.log('Client connected:', client.id);
+  //     const token = client.handshake.headers.authorization?.replace(
+  //       'Bearer ',
+  //       '',
+  //     );
+  //     if (!token) throw new Error('No token');
+
+  //     const user = this.jwtService.verify<UserAuth>(token);
+  //     client.data.user = user; // salva o user no socket
+  //   } catch (err) {
+  //     client.disconnect(); // desconecta se não estiver autenticado
+  //   }
+  // }
 
   // Join room de um quadro
   @SubscribeMessage('joinBoard')
@@ -70,11 +102,15 @@ export class BoardGateway {
 
   // Criar cartão em um quadro
   @SubscribeMessage('createCard')
-  async handleCreateCard(@MessageBody() data: CardDto) {
+  async handleCreateCard(
+    @MessageBody() data: CardDto,
+    @ConnectedSocket() client: CustomSocket,
+  ) {
     try {
+      const user = client.data.user;
       const newCard = await this.cardsService.create({
         ...data,
-        userId: 1,
+        userId: +user.id,
       });
 
       // Emite apenas para quem está no mesmo quadro
@@ -92,7 +128,6 @@ export class BoardGateway {
   @SubscribeMessage('updateCardPosition')
   async handleUpdatePosition(@MessageBody() data: UpdateCardPositionDto) {
     try {
-      console.log('data.boardId', data);
       const updatedCard = await this.cardsService.updatePosition(
         data.id,
         data.newPosition,
@@ -111,10 +146,6 @@ export class BoardGateway {
       });
       return false;
     }
-
-    // this.server.to(`board_${data.boardId}`).emit('cardUpdated', updatedCard);
-
-    // return updatedCard;
   }
 
   /*** message chat */

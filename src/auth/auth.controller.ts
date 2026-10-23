@@ -11,9 +11,18 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './auth.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import type { MbRequest } from '../@types/customRequest';
+import type { Response } from 'express';
 
-interface AuthResponse extends Response {
-  clearCookie(name: string, options?: any): void;
+// interface AuthResponse extends Response {
+//   clearCookie(name: string, options?: any): void;
+// }
+interface AuthenticatedRequest extends Request {
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+  };
 }
 
 @Controller('auth')
@@ -21,20 +30,38 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('login')
-  login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const { token, user } = await this.authService.login(dto);
+
+    response.cookie('access_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 1000,
+    });
+
+    return user;
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  getMe(@Req() req: MbRequest) {
+  getMe(@Req() req: AuthenticatedRequest) {
     return req.user;
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  logout(@Res({ passthrough: true }) res: AuthResponse) {
-    res?.clearCookie('jwt');
+  logout(@Res({ passthrough: true }) response: Response) {
+    response.clearCookie('access_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+    });
     return true;
   }
 }

@@ -1,20 +1,11 @@
 import { DataSource } from 'typeorm';
-// import { User, UserRole } from '../users/user.entity';
 import * as bcrypt from 'bcrypt';
-import { User, UserRole } from '../users/entities/user.entity';
+import { User, UserRole, UserStatus } from '../users/entities/user.entity';
+import 'dotenv/config';
+
+import dataSource from '../data-source';
 
 async function runAdminSeed() {
-  const dataSource = new DataSource({
-    type: 'postgres',
-    host: 'localhost',
-    port: 5433,
-    username: 'postgres',
-    password: '1234',
-    database: 'mindboarddb',
-    entities: [User],
-    synchronize: true, // apenas dev
-  });
-
   await dataSource.initialize();
   console.log('DataSource initialized');
 
@@ -38,6 +29,7 @@ async function runAdminSeed() {
     email: 'admin@mindboardips.com',
     password: hashedPassword,
     role: UserRole.ADMIN,
+    status: UserStatus.ACTIVE,
   });
 
   await userRepository.save(admin);

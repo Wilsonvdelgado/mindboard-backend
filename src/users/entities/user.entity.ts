@@ -44,6 +44,9 @@ export class User {
   })
   status: UserStatus;
 
+  @Column({ nullable: true })
+  verificationToken: string;
+
   @OneToMany(() => Board, (boards) => boards.user)
   boards: Board[];
 
@@ -52,6 +55,4 @@ export class User {
 
   @OneToMany(() => Message, (messages) => messages.user)
   messages: Message[];
-  // @OneToMany(() => Message, (messages) => messages.user)
-  // messages: Message[];
 }

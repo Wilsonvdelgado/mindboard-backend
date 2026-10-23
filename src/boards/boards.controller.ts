@@ -3,14 +3,17 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
+  UseGuards,
+  Put,
 } from '@nestjs/common';
 import { BoardsService } from './boards.service';
 import { CreateBoardDto, UpdateBoardDto } from './dto/board.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('boards')
+@UseGuards(JwtAuthGuard)
 export class BoardsController {
   constructor(private readonly boardsService: BoardsService) {}
 
@@ -29,7 +32,7 @@ export class BoardsController {
     return this.boardsService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(@Param('id') id: string, @Body() updateBoardDto: UpdateBoardDto) {
     return this.boardsService.update(+id, updateBoardDto);
   }

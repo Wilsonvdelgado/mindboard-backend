@@ -21,3 +21,13 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   name: string;
   email: string;
 }
+
+export class CreatePasswordDto {
+  password: string;
+  token: string;
+}
+
+export class ChangePasswordDto {
+  currentPassword: string;
+  newPassword: string;
+}
