@@ -29,9 +29,9 @@ interface CustomSocket extends Socket {
 }
 
 @WebSocketGateway({ cors: {
-    origin: 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL,
     credentials: true,
-    methods: ['GET', 'POST'],
+    methods: ['GET', 'POST',  'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   } })
 export class BoardGateway {
   @WebSocketServer()
