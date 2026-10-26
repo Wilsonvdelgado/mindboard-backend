@@ -6,6 +6,8 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import 'dotenv/config';
+
 
 import { CardsService } from '../cards/cards.service';
 import { CardDto, UpdateCardPositionDto } from '../cards/dto/card.dto';
@@ -28,6 +30,7 @@ interface CustomSocket extends Socket {
   };
 }
 
+console.log('FRONTEND_URL:', process.env.FRONTEND_URL);
 @WebSocketGateway({ cors: {
     origin: process.env.FRONTEND_URL,
     credentials: true,
