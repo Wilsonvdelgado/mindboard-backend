@@ -12,7 +12,7 @@ async function bootstrap() {
   console.log("env front:",process.env.FRONTEND_URL)
   
  app.enableCors({
-    origin:true,//process.env.FRONTEND_URL,
+    origin: process.env.FRONTEND_URL,
     methods,
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
