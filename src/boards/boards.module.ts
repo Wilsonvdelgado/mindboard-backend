@@ -10,6 +10,7 @@ import { Message } from '../messages/entities/message.entity';
 import { Card } from '../cards/entities/card.entity';
 import { MessagesModule } from '../messages/messages.module';
 import { AuthModule } from '../auth/auth.module';
+import { SocketTicketService } from './socketTicket.service';
 
 @Module({
   imports: [
@@ -19,6 +20,6 @@ import { AuthModule } from '../auth/auth.module';
     AuthModule,
   ],
   controllers: [BoardsController],
-  providers: [BoardsService, BoardGateway],
+  providers: [BoardsService, BoardGateway, SocketTicketService],
 })
 export class BoardsModule {}

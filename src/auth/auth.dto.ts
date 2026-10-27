@@ -10,8 +10,9 @@ export class LoginDto {
 }
 
 export class UserAuth {
-  id: string;
+  id: number;
   email: string;
   name: string;
   role: UserRole;
+  exp: number;
 }

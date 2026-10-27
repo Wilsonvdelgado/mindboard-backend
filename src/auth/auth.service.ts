@@ -28,17 +28,23 @@ export class AuthService {
 
     const { id, email, name, role } = user;
 
-    const token = this.jwtService.sign({
-      id,
-      email,
-      name,
-      role,
-    });
+    const token = this.jwtService.sign(
+      {
+        id,
+        email,
+        name,
+        role,
+      },
+      { expiresIn: '1h' },
+    );
+    const payload = this.jwtService.decode<{ exp?: number }>(token);
 
-    return { token, user: { name, email, role } };
+    if (!payload?.exp) {
+      throw new Error('O token JWT gerado não contém uma data de expiração.');
+    }
+
+    return { token, user: { name, email, role, exp: payload.exp } };
   }
 
-  //   async findById(id: number) {
-  //     return this.userRepo.findOne({ where: { id } });
-  //   }
+ 
 }

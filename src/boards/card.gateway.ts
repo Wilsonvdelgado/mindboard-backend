@@ -8,16 +8,14 @@ import {
 import { Server, Socket } from 'socket.io';
 import 'dotenv/config';
 
-
 import { CardsService } from '../cards/cards.service';
 import { CardDto, UpdateCardPositionDto } from '../cards/dto/card.dto';
 import { MessagesService } from '../messages/messages.service';
 import { CreateMessageDto } from '../messages/dto/create-message.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UserAuth } from '../auth/auth.dto';
-  import { parseCookie } from 'cookie';
-
-
+import { parseCookie } from 'cookie';
+import { SocketTicketService } from './socketTicket.service';
 
 function getError(err: unknown) {
   const error = err instanceof Error ? err : new Error(String(err));
@@ -26,16 +24,18 @@ function getError(err: unknown) {
 
 interface CustomSocket extends Socket {
   data: {
-    user: { id: string; username: string }; // define o que guardas
+    user: { id: number }; // define o que guardas
   };
 }
 
 console.log('FRONTEND_URL:', process.env.FRONTEND_URL);
-@WebSocketGateway({ cors: {
+@WebSocketGateway({
+  cors: {
     origin: process.env.FRONTEND_URL,
     credentials: true,
-    methods: ['GET', 'POST',  'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  } })
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  },
+})
 export class BoardGateway {
   @WebSocketServer()
   server: Server;
@@ -43,26 +43,32 @@ export class BoardGateway {
   constructor(
     private readonly cardsService: CardsService,
     private readonly messagesService: MessagesService,
-    private jwtService: JwtService,
+    private readonly socketTickets: SocketTicketService,
   ) {}
 
-   afterInit(server: Server) {
-    server.use(async (client: Socket, next) => {
+  afterInit(server: Server) {
+    server.use(async (client: CustomSocket, next) => {
       try {
-        const cookieHeader = client.handshake.headers.cookie ?? '';
-        const cookies = parseCookie(cookieHeader);
+        const ticket = client.handshake.auth.ticket;
 
-
-        // Substitui pelo nome real do teu cookie HttpOnly.
-        const token = cookies['access_token'];
-
-        if (!token) {
-          return next(new Error('Unauthorized'));
+        if (typeof ticket !== 'string') {
+          next(new Error('unauthorized'));
+          return;
         }
 
-        const user = await this.jwtService.verifyAsync<UserAuth>(token);
+        const auth = this.socketTickets.consume(ticket);
 
-        client.data.user = user;
+        if (auth === null) {
+          next(new Error('unauthorized'));
+          return;
+        }
+
+        client.data.user = { id: auth.userId };
+
+        const delay = auth.jwtExpiresAt - Date.now();
+        const timer = setTimeout(() => client.disconnect(true), delay);
+
+        client.once('disconnect', () => clearTimeout(timer));
 
         next();
       } catch {
@@ -71,21 +77,9 @@ export class BoardGateway {
     });
   }
 
-  // handleConnection(client: Socket) {
-  //   try {
-  //     console.log('Client connected:', client.id);
-  //     const token = client.handshake.headers.authorization?.replace(
-  //       'Bearer ',
-  //       '',
-  //     );
-  //     if (!token) throw new Error('No token');
+  
 
-  //     const user = this.jwtService.verify<UserAuth>(token);
-  //     client.data.user = user; // salva o user no socket
-  //   } catch (err) {
-  //     client.disconnect(); // desconecta se não estiver autenticado
-  //   }
-  // }
+
 
   // Join room de um quadro
   @SubscribeMessage('joinBoard')
@@ -164,7 +158,7 @@ export class BoardGateway {
     try {
       const newCard = await this.messagesService.create({
         ...data,
-        userId: +user.id,
+        userId: user.id,
       });
 
       // Emite apenas para quem está no mesmo quadro
@@ -184,24 +178,4 @@ export class BoardGateway {
     const data = await this.messagesService.findAll(boardId);
     return data;
   }
-
-  // // Atualizar posição
-  // @SubscribeMessage('updateCardPosition')
-  // async handleUpdatePosition(
-  //   @MessageBody() data: { id: number; newPosition: number },
-  // ) {
-  //   // const updatedCard = await this.cardsService.updatePosition(
-  //   //   data.id,
-  //   //   data.newPosition,
-  //   // );
-  //   this.server.emit('cardUpdated', { updatedCard: 'sss' }); // notifica todos
-  //   return 'updatedCard';
-  // }
-
-  // Pegar todos os cartões
-  // @SubscribeMessage('getCards')
-  // async handleGetCards() {
-  //   const cards = await this.cardsService.findAll();
-  //   return cards;
-  // }
 }

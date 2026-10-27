@@ -13,21 +13,11 @@ import { JwtAuthGuard } from './jwt-auth.guard';
 import type { MbRequest } from '../@types/customRequest';
 import type { Response } from 'express';
 
-// interface AuthResponse extends Response {
-//   clearCookie(name: string, options?: any): void;
-// }
-interface AuthenticatedRequest extends Request {
-  user: {
-    id: string;
-    email: string;
-    name: string;
-    role: string;
-  };
-}
-
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+  ) {}
 
   @Post('login')
   async login(
@@ -49,16 +39,20 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  getMe(@Req() req: AuthenticatedRequest) {
+  getMe(@Req() req: MbRequest) {
     return req.user;
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  logout(@Res({ passthrough: true }) response: Response) {
+  logout(
+    @Req() request: MbRequest,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+
     response.clearCookie('access_token', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: true,
       sameSite: 'none',
       path: '/',
     });
